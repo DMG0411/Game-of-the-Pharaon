@@ -9,14 +9,14 @@ class StonesOfThePharaoh:
         self.root.title("Stones of the Pharaoh")
 
         self.grid_size = 9
-        self.colors = ["red", "blue", "green", "yellow", "purple"]
+        self.colors = ["red", "blue", "green"]
         self.grid = [
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
 
-        self.init_ui()
+        self.create_ui()
 
-    def init_ui(self):
+    def create_ui(self):
         self.frame = tk.Frame(self.root)
         self.frame.pack()
 
@@ -38,6 +38,7 @@ class StonesOfThePharaoh:
         self.reset_button = tk.Button(
             self.root,
             text="Start over",
+            command=self.init_game,
         )
         self.reset_button.pack(pady=10)
 
@@ -46,9 +47,9 @@ class StonesOfThePharaoh:
         )
         self.status_label.pack()
 
-        self.init_table()
+        self.init_game()
 
-    def init_table(self):
+    def init_game(self):
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 self.grid[row][col] = random.choice(self.colors)
