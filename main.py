@@ -31,6 +31,7 @@ class StonesOfThePharaoh:
                     text="",
                     width=4,
                     height=2,
+                    command=lambda r=row, c=col: self.cell_clicked(r, c),
                 )
                 btn.grid(row=row, column=col, padx=2, pady=2)
                 self.buttons[row][col] = btn
@@ -62,6 +63,38 @@ class StonesOfThePharaoh:
             btn.config(bg=color, state="normal")
         else:
             btn.config(bg="white", state="disabled")
+
+    def cell_clicked(self, row, col):
+        color = self.grid[row][col]
+        if not color:
+            return
+        group = self.find_connected_blocks(row, col, color)
+
+        if len(group) > 1:
+            self.remove_blocks(group)
+        else:
+            self.status_label.config(text="No group to remove. Select a group.")
+
+    def find_connected_blocks(self, row, col, color):
+        to_check = [(row, col)]
+        connected = set()
+
+        while to_check:
+            r, c = to_check.pop()
+            if (r, c) in connected or not (
+                0 <= r < self.grid_size and 0 <= c < self.grid_size
+            ):
+                continue
+            if self.grid[r][c] == color:
+                connected.add((r, c))
+                to_check.extend([(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)])
+
+        return connected
+
+    def remove_blocks(self, group):
+        for row, col in group:
+            self.grid[row][col] = None
+            self.set_button_color(row, col)
 
 
 if __name__ == "__main__":
