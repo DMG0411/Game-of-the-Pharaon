@@ -10,7 +10,7 @@ class StonesOfThePharaoh:
         self.root.configure(bg="#f7f3e9")
 
         self.grid_size = 9
-        self.colors = ["red", "blue", "green"]
+        self.colors = ["#f28b82", "#aecbfa", "#ccff90"]
         self.grid = [
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
@@ -71,6 +71,8 @@ class StonesOfThePharaoh:
                     relief="groove",
                 )
                 btn.grid(row=row, column=col, padx=2, pady=2)
+                btn.bind("<Enter>", lambda e, r=row, c=col: self.highlight_group(r, c))
+                btn.bind("<Leave>", lambda e: self.reset_highlight())
                 self.buttons[row][col] = btn
 
         self.reset_button = tk.Button(
@@ -133,9 +135,9 @@ class StonesOfThePharaoh:
         color = self.grid[row][col]
         btn = self.buttons[row][col]
         if color:
-            btn.config(bg=color, state="normal")
+            btn.config(bg=color, state="normal", relief="groove")
         else:
-            btn.config(bg="#ffffff", state="disabled")
+            btn.config(bg="#ffffff", state="disabled", relief="flat")
 
     def cell_clicked(self, row, col):
         color = self.grid[row][col]
@@ -158,6 +160,22 @@ class StonesOfThePharaoh:
                 self.game_over()
             else:
                 self.status_label.config(text="No group! You lost a life!")
+
+    def highlight_group(self, row, col):
+        color = self.grid[row][col]
+        if not color:
+            return
+        group = self.find_connected_blocks(row, col, color)
+        for r, c in group:
+            self.buttons[r][c].config(relief="solid", bd=1)
+
+    def reset_highlight(self):
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                if self.grid[row][col]:
+                    self.buttons[row][col].config(relief="groove", bd=2)
+                else:
+                    self.buttons[row][col].config(relief="flat", bd=0)
 
     def find_connected_blocks(self, row, col, color):
         to_check = [(row, col)]
