@@ -14,6 +14,7 @@ class StonesOfThePharaoh:
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
         self.score = 0
+        self.lives = 3
 
         self.create_ui()
 
@@ -47,6 +48,9 @@ class StonesOfThePharaoh:
         self.score_label = tk.Label(self.root, text=f"Score: {self.score}")
         self.score_label.pack()
 
+        self.lives_label = tk.Label(self.root, text=f"Lives: {self.lives}")
+        self.lives_label.pack()
+
         self.status_label = tk.Label(
             self.root, text="Click on a group of 2 or more to break pads."
         )
@@ -56,7 +60,9 @@ class StonesOfThePharaoh:
 
     def init_game(self):
         self.score = 0
+        self.lives = 3
         self.update_score_label()
+        self.update_lives_label()
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 self.grid[row][col] = random.choice(self.colors)
@@ -78,9 +84,19 @@ class StonesOfThePharaoh:
 
         if len(group) > 1:
             self.remove_blocks(group)
+            self.apply_gravity()
             self.update_score(len(group))
         else:
-            self.status_label.config(text="No group to remove. Select a group.")
+            self.grid[row][col] = None
+            self.set_button_color(row, col)
+            self.apply_gravity()
+            self.lives -= 1
+            self.update_lives_label()
+
+            if self.lives <= 0:
+                self.game_over()
+            else:
+                self.status_label.config(text="No group! You lost a life!")
 
     def find_connected_blocks(self, row, col, color):
         to_check = [(row, col)]
@@ -103,12 +119,60 @@ class StonesOfThePharaoh:
             self.grid[row][col] = None
             self.set_button_color(row, col)
 
+    def apply_gravity(self):
+        for col in range(self.grid_size):
+            non_empty = [
+                self.grid[row][col]
+                for row in range(self.grid_size)
+                if self.grid[row][col]
+            ]
+            for row in range(self.grid_size):
+                if row < self.grid_size - len(non_empty):
+                    self.grid[row][col] = None
+                else:
+                    self.grid[row][col] = non_empty[
+                        row - (self.grid_size - len(non_empty))
+                    ]
+        self.shift_columns()
+
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                self.set_button_color(row, col)
+
+    def shift_columns(self):
+        non_empty_columns = [
+            col
+            for col in range(self.grid_size)
+            if any(self.grid[row][col] for row in range(self.grid_size))
+        ]
+
+        new_grid = [
+            [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
+        ]
+
+        shift_start = self.grid_size - len(non_empty_columns)
+
+        for new_col, old_col in enumerate(non_empty_columns, start=shift_start):
+            for row in range(self.grid_size):
+                new_grid[row][new_col] = self.grid[row][old_col]
+
+        self.grid = new_grid
+
     def update_score(self, blocks_removed):
         self.score += blocks_removed * 100
         self.update_score_label()
 
     def update_score_label(self):
         self.score_label.config(text=f"Score: {self.score}")
+
+    def update_lives_label(self):
+        self.lives_label.config(text=f"Lives: {self.lives}")
+
+    def game_over(self):
+        messagebox.showinfo(
+            "Game Over", f"Game over! Your final score is: {self.score}"
+        )
+        self.init_game()
 
 
 if __name__ == "__main__":
