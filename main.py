@@ -7,6 +7,7 @@ class StonesOfThePharaoh:
     def __init__(self, root):
         self.root = root
         self.root.title("Stones of the Pharaoh")
+        self.root.configure(bg="#f7f3e9")
 
         self.grid_size = 9
         self.colors = ["red", "blue", "green"]
@@ -16,11 +17,41 @@ class StonesOfThePharaoh:
         self.score = 0
         self.lives = 3
 
-        self.create_ui()
+        self.create_main_screen()
+        self.create_game_screen()
 
-    def create_ui(self):
-        self.frame = tk.Frame(self.root)
-        self.frame.pack()
+    def create_main_screen(self):
+        self.main_frame = tk.Frame(self.root, bg="#f7f3e9")
+        self.main_frame.pack(fill="both", expand=True)
+
+        title_label = tk.Label(
+            self.main_frame,
+            text="Stones of the Pharaoh",
+            font=("Helvetica", 28, "bold"),
+            bg="#f7f3e9",
+            fg="#5e548e",
+        )
+        title_label.pack(pady=30)
+
+        play_button = tk.Button(
+            self.main_frame,
+            text="Play",
+            font=("Helvetica", 16),
+            bg="#ffcc80",
+            fg="#5e548e",
+            activebackground="#ffb74d",
+            activeforeground="white",
+            relief="raised",
+            bd=2,
+            command=self.start_game,
+        )
+        play_button.pack(pady=20)
+
+    def create_game_screen(self):
+        self.game_frame = tk.Frame(self.root, bg="#f7f3e9")
+
+        self.grid_frame = tk.Frame(self.game_frame, bg="#f7f3e9")
+        self.grid_frame.pack(pady=20)
 
         self.buttons = [
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
@@ -29,33 +60,63 @@ class StonesOfThePharaoh:
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 btn = tk.Button(
-                    self.frame,
+                    self.grid_frame,
                     text="",
                     width=4,
                     height=2,
+                    bg="#ffffff",
+                    fg="#5e548e",
+                    font=("Helvetica", 10, "bold"),
                     command=lambda r=row, c=col: self.cell_clicked(r, c),
+                    relief="groove",
                 )
                 btn.grid(row=row, column=col, padx=2, pady=2)
                 self.buttons[row][col] = btn
 
         self.reset_button = tk.Button(
-            self.root,
+            self.game_frame,
             text="Start over",
+            font=("Helvetica", 14),
+            bg="#ffcc80",
+            fg="#5e548e",
+            activebackground="#ffb74d",
+            activeforeground="white",
+            relief="raised",
+            bd=2,
             command=self.init_game,
         )
         self.reset_button.pack(pady=10)
 
-        self.score_label = tk.Label(self.root, text=f"Score: {self.score}")
+        self.score_label = tk.Label(
+            self.game_frame,
+            text=f"Score: {self.score}",
+            font=("Helvetica", 16),
+            bg="#f7f3e9",
+            fg="#5e548e",
+        )
         self.score_label.pack()
 
-        self.lives_label = tk.Label(self.root, text=f"Lives: {self.lives}")
+        self.lives_label = tk.Label(
+            self.game_frame,
+            text=f"Lives: {self.lives}",
+            font=("Helvetica", 16),
+            bg="#f7f3e9",
+            fg="#5e548e",
+        )
         self.lives_label.pack()
 
         self.status_label = tk.Label(
-            self.root, text="Click on a group of 2 or more to break pads."
+            self.game_frame,
+            text="Click on a group of 2 or more to break pads.",
+            font=("Helvetica", 12),
+            bg="#f7f3e9",
+            fg="#5e548e",
         )
-        self.status_label.pack()
+        self.status_label.pack(pady=10)
 
+    def start_game(self):
+        self.main_frame.pack_forget()
+        self.game_frame.pack(fill="both", expand=True)
         self.init_game()
 
     def init_game(self):
@@ -74,7 +135,7 @@ class StonesOfThePharaoh:
         if color:
             btn.config(bg=color, state="normal")
         else:
-            btn.config(bg="white", state="disabled")
+            btn.config(bg="#ffffff", state="disabled")
 
     def cell_clicked(self, row, col):
         color = self.grid[row][col]
@@ -172,7 +233,8 @@ class StonesOfThePharaoh:
         messagebox.showinfo(
             "Game Over", f"Game over! Your final score is: {self.score}"
         )
-        self.init_game()
+        self.game_frame.pack_forget()
+        self.main_frame.pack(fill="both", expand=True)
 
 
 if __name__ == "__main__":
