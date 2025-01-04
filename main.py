@@ -13,6 +13,7 @@ class StonesOfThePharaoh:
         self.grid = [
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
+        self.score = 0
 
         self.create_ui()
 
@@ -43,6 +44,9 @@ class StonesOfThePharaoh:
         )
         self.reset_button.pack(pady=10)
 
+        self.score_label = tk.Label(self.root, text=f"Score: {self.score}")
+        self.score_label.pack()
+
         self.status_label = tk.Label(
             self.root, text="Click on a group of 2 or more to break pads."
         )
@@ -51,6 +55,8 @@ class StonesOfThePharaoh:
         self.init_game()
 
     def init_game(self):
+        self.score = 0
+        self.update_score_label()
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 self.grid[row][col] = random.choice(self.colors)
@@ -72,6 +78,7 @@ class StonesOfThePharaoh:
 
         if len(group) > 1:
             self.remove_blocks(group)
+            self.update_score(len(group))
         else:
             self.status_label.config(text="No group to remove. Select a group.")
 
@@ -95,6 +102,13 @@ class StonesOfThePharaoh:
         for row, col in group:
             self.grid[row][col] = None
             self.set_button_color(row, col)
+
+    def update_score(self, blocks_removed):
+        self.score += blocks_removed * 100
+        self.update_score_label()
+
+    def update_score_label(self):
+        self.score_label.config(text=f"Score: {self.score}")
 
 
 if __name__ == "__main__":
