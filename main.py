@@ -10,7 +10,9 @@ class StonesOfThePharaoh:
         self.root.configure(bg="#f7f3e9")
 
         self.grid_size = 9
-        self.colors = ["#f28b82", "#aecbfa", "#ccff90"]
+        self.base_colors = ["#f28b82", "#aecbfa"]
+        self.level = 1
+        self.colors = self.base_colors[:2]
         self.grid = [
             [None for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
@@ -119,11 +121,14 @@ class StonesOfThePharaoh:
     def start_game(self):
         self.main_frame.pack_forget()
         self.game_frame.pack(fill="both", expand=True)
+        self.score = 0
+        self.lives = 3
+        self.level = 1
+        self.colors = self.base_colors[:2]
         self.init_game()
 
     def init_game(self):
-        self.score = 0
-        self.lives = 3
+        self.update_status(f"Level {self.level}")
         self.update_score_label()
         self.update_lives_label()
         for row in range(self.grid_size):
@@ -160,6 +165,31 @@ class StonesOfThePharaoh:
                 self.game_over()
             else:
                 self.status_label.config(text="No group! You lost a life!")
+        if self.is_level_complete():
+            self.level_up()
+
+    def is_level_complete(self):
+        return all(
+            self.grid[row][col] is None
+            for row in range(self.grid_size)
+            for col in range(self.grid_size)
+        )
+
+    def level_up(self):
+        if self.lives > 0:
+            self.level += 1
+            self.colors.append(self.generate_new_color())
+            messagebox.showinfo("Level Up", f"Level {self.level}")
+            self.init_game()
+
+    def generate_new_color(self):
+        while True:
+            new_color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+            if new_color not in self.colors:
+                return new_color
+
+    def update_status(self, text):
+        self.status_label.config(text=text)
 
     def highlight_group(self, row, col):
         color = self.grid[row][col]
